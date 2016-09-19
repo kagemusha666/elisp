@@ -1,13 +1,18 @@
 ;;; Example .emacs file
-;;; Put together by Thomas J.
-;;; Inspiration from Hallon, Mankan and Daniel-san.
 ;;;
 ;;; Search for TODO to find things that must changed to your settings.
 ;;; Additional things might have to be changed to your liking.
 
- (add-to-list 'load-path "/home/tools/elisp")
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 
 ;; General environment
+(add-to-list 'load-path "~/.emacs.d/elisp/")
 (set-language-environment "Latin-1")
 (setq default-major-mode 'text-mode)
 (setq next-line-add-newlines nil)
@@ -18,6 +23,8 @@
       (append '(".obj" ".exe" ".o" ".class" ".hex" ".cod" ".$$$" ".elc")
               completion-ignored-extensions))
 
+;; keyboard scroll one line at a time
+(setq scroll-step 1)
 
 ;; Unique buffernames
 (load "uniquify")
@@ -65,6 +72,8 @@
 (global-set-key [f5] 'compile)
 (global-set-key [down-mouse-3] 'imenu)
 (global-set-key [mouse-2] nil)
+(global-set-key "\C-q" 'kill-buffer)
+(global-set-key "\C-z" 'buffer-menu)
 (global-unset-key [S-backspace])
 (global-unset-key [S-delete])
 
@@ -96,7 +105,7 @@
 (defun get-other-c++-buffer ()
    (let* ((buffer-base-file-name
            (file-name-sans-extension (buffer-file-name)))
-          (h-file-name (concat buffer-base-file-name ".h"))
+          (h-file-name (concat buffer-base-file-name ".h") (concat buffer-base-file-name "*.hpp"))
           (cpp-file-name (concat buffer-base-file-name ".cpp"))
           (c-file-name (concat buffer-base-file-name ".c")))
      (cond
@@ -146,44 +155,52 @@
 (global-set-key [C-M-f8] 'switch-to-other-c++-file-in-next-frame)
 (global-set-key [C-f9] 'go-unix-file)
 
-
 ;;; ---------------------------------------------------------------------------
 ;;; Colors and fonts.
 
 ;; TODO: Change colors and fonts to your liking.
 
-;; Colors
-(setq default-frame-alist
-      '((width . 80) (height . 76)
-        (cursor-color . "orchid")
-        (foreground-color . "black")
-        (background-color . "burlywood")
-        (font . "-*-courier-medium-r-normal--14-100-*-*-*-*-iso8859-1")))
-(setq initial-frame-alist
-      '((width . 80) (height . 76)))
-
-(set-face-foreground 'modeline "yellow")
-(set-face-background 'modeline "black")
-
 (defun my-font-lock-colors ()
-  (set-face-foreground 'font-lock-comment-face "blue4")
-  (set-face-foreground 'font-lock-string-face "light yellow")
-  (set-face-foreground 'font-lock-function-name-face "blue1")
-  (set-face-foreground 'font-lock-keyword-face "red4")
-  (set-face-foreground 'font-lock-variable-name-face "red3")
-  (set-face-foreground 'font-lock-type-face "red2")
-  (set-face-foreground 'font-lock-constant-face "yellow1")
-  (set-face-foreground 'font-lock-builtin-face "blue2")
-  (make-face-bold 'font-lock-keyword-face)
-  (make-face-bold 'font-lock-function-name-face))
+  (set-face-foreground 'minibuffer-prompt "dark orange")
+)
 (add-hook 'font-lock-mode-hook 'my-font-lock-colors)
 
+;;; ---------------------------------------------------------------------------
+;;; Packages.
+
+(require 'package-installer)
+
+(defconst packages
+  '(anzu
+    company
+    duplicate-thing
+    ggtags
+    helm
+    helm-gtags
+    helm-projectile
+    helm-swoop
+    function-args
+    clean-aindent-mode
+    comment-dwim-2
+    dtrt-indent
+    ws-butler
+    iedit
+    yasnippet
+    smartparens
+    projectile
+    volatile-highlights
+    undo-tree
+    zygospore))
+
+(install-packages packages)
 
 ;;; ---------------------------------------------------------------------------
 ;;; Programming mode stuff.
 
-;; C/C++ stuff according to Kreatel/Motorola coding standards.
-(require 'kreatv-recommended)
+;; C/C++ stuff according to my own coding standards.
+;;(require 'common-recommended)
+(require 'setup-emacs-extensions)
+(require 'common-recommended)
 
 ;; Turn on font-lock in all modes that support it
 
@@ -191,140 +208,10 @@
     (global-font-lock-mode t))
 (setq font-lock-maximum-decoration t)
 
-;; IDL mode
-(add-hook 'idl-mode-hook
-          '(lambda ()
-             (make-local-variable 'font-lock-defaults)
-             (setq font-lock-defaults '(idl-font-lock-keywords))))
-
 (setq auto-mode-alist
       (append '(("\\.h$" . c++-mode)
                 ("\\.c$" . c++-mode))
               auto-mode-alist))
 
-
 ;;; ---------------------------------------------------------------------------
-;;; Printing
-
-
-(defun kreatel-ps-print-code ()
-  (interactive)
-  (require 'ps-print)
-  (let ((ps-paper-type 'a4)
-        (ps-landscape-mode t)
-        (ps-number-of-columns 2)
-        (ps-line-number 1)
-        (ps-zebra-stripes t)
-        (ps-print-color-p nil))
-    (ps-print-buffer-with-faces "~/test.ps")))
-
-;; Menu bar commands
-(define-key menu-bar-tools-menu [ps-print-buffer-with-faces]
-  '("Print Code" . kreatel-ps-print-code))
-(define-key global-map "\C-cp" 'kreatel-ps-print-code)
-
-
-;;; ---------------------------------------------------------------------------
-;;; Workflex
-;;; This is settings for the home made little time reporting tool.
-;;; TODO: The whole section can be removed if you decide not to use workflex.
-
-;; TODO: Set directory where to store your time report files.
-(setq flex-dir "/home/?/tidlappar")
-;; TODO: Set your name here.
-(setq flex-name "? ?")
-(setq flex-filename-format "%Y-%b.txt")
-
-(require 'workflex "/home/tools/devtools/trunk/elisp/workflex.el")
-(setq flex-command "/home/tools/devtools/trunk/bin/workflex")
-
-
-;;; ---------------------------------------------------------------------------
-;;; Programming help functions
-;;; TODO: Remove what you want or change key mappings.
-
-(setq load-path (cons "/home/tools/devtools/trunk/elisp" load-path))
-
-;; Insert header in C++ file.
-(require 'kreatel-c++-header "c++-header.el")
-(global-set-key "\C-c\C-h" 'kreatel-insert-header-stuff)
-
-;; Help functions for unit testing.
-(require 'kreatel-unit-test "unittest.el")
-(global-set-key "\C-x\C-m" 'kreatel-create-mock-class)
-(global-set-key "\C-x\C-t" 'kreatel-create-test-class)
-
-;; Dabbrev expand, smart way to type things smart. Write the beginning
-;; of a word anywhere in you buffers and hit esc-esc.
-(global-set-key "\M-\e" 'dabbrev-expand)
-(setq dabbrev-case-replace nil)
-(setq dabbrev-case-fold-search nil)
-
-;;; ---------------------------------------------------------------------------
-;;; Limit line length and encourage fixing broken files
-
-(defun find-longest-line-in-buffer ()
-  "Find the longest line in the current buffer. Returns a dotted pair
-   of the length of the longest line, and the point where the longest
-   line was found. See `current-column' for the definition of line
-   length."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (let ((maxlen 0)
-            (badpos (point)))
-        (while (not (eobp))
-          (end-of-line)
-          (let ((cc (current-column)))
-            (when (> cc maxlen)
-              (setq maxlen cc)
-              (setq badpos (point))))
-          (forward-line))
-        (cons maxlen badpos)))))
-
-(defun refuse-overlong-lines ()
-  "Ask for confirmation if a too long line is found in the current buffer."
-  (let ((maxcol (find-longest-line-in-buffer)))
-    (when (> (car maxcol) 131)
-      (if (yes-or-no-p
-           "Found too long line, do you REALLY REALLY want to save? ")
-          nil
-        (progn
-          (goto-char (cdr maxcol))
-          (message "Jumping to offensive line")
-          t)))))
-
-(defun warn-overlong-lines ()
-  "Warn for a too long line and sleep a short while en encourage a fix."
-  (let ((maxcol (find-longest-line-in-buffer)))
-    (when (> (car maxcol) 131)
-      (message "*** This file has lines that are too long! ***")
-      (sleep-for 1)
-      nil)))
-
-(defun c++-on-open-allow-overlong ()
-  "Find out if there is a too long line in a newly opened buffer and
-   set allow-overlong-lines properly."
-  (make-variable-buffer-local 'allow-overlong-lines)
-  (setq allow-overlong-lines nil)
-  (let ((maxcol (find-longest-line-in-buffer)))
-    (when (> (car maxcol) 131)
-      (setq allow-overlong-lines t)))
-  (message "%s" allow-overlong-lines))
-
-(add-hook 'c++-mode-hook
-          '(lambda ()
-             (if (and (boundp allow-overlong-lines) allow-overlong-lines)
-                 (add-hook 'write-contents-hooks 'warn-overlong-lines)
-               (add-hook 'write-contents-hooks 'refuse-overlong-lines))))
-(add-hook 'c++-mode-hook 'c++-on-open-allow-overlong)
-
-(add-hook 'c-mode-hook
-          '(lambda ()
-             (if (and (boundp allow-overlong-lines) allow-overlong-lines)
-                 (add-hook 'write-contents-hooks 'warn-overlong-lines)
-               (add-hook 'write-contents-hooks 'refuse-overlong-lines))))
-(add-hook 'c-mode-hook 'c++-on-open-allow-overlong)
-
-;;;
+;; Automitic settings:

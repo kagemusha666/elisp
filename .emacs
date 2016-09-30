@@ -22,9 +22,16 @@
 (setq completion-ignored-extensions
       (append '(".obj" ".exe" ".o" ".class" ".hex" ".cod" ".$$$" ".elc")
               completion-ignored-extensions))
+(setq same-window-buffer-names '(*shell* *info* *Help*))
 
 ;; keyboard scroll one line at a time
 (setq scroll-step 1)
+(setq scroll-conservatively 10000)
+(setq auto-window-vscroll nil)
+;; Autosave every 500 typed characters
+(setq auto-save-interval 500)
+;; Delay updates to give Emacs a chance for other changes
+(setq linum-delay t)
 
 ;; Unique buffernames
 (load "uniquify")
@@ -76,6 +83,10 @@
 (global-set-key "\C-z" 'buffer-menu)
 (global-unset-key [S-backspace])
 (global-unset-key [S-delete])
+(global-set-key (kbd "C-x <up>") 'windmove-up)
+(global-set-key (kbd "C-x <down>") 'windmove-down)
+(global-set-key (kbd "C-x <left>") 'windmove-left)
+(global-set-key (kbd "C-x <right>") 'windmove-right)
 
 (setq compilation-finish-function '(lambda (buf res)
                                      (if (not (equal (substring res 0 8)
@@ -105,7 +116,7 @@
 (defun get-other-c++-buffer ()
    (let* ((buffer-base-file-name
            (file-name-sans-extension (buffer-file-name)))
-          (h-file-name (concat buffer-base-file-name ".h") (concat buffer-base-file-name "*.hpp"))
+          (h-file-name (concat buffer-base-file-name ".h"))
           (cpp-file-name (concat buffer-base-file-name ".cpp"))
           (c-file-name (concat buffer-base-file-name ".c")))
      (cond
@@ -179,6 +190,7 @@
     helm-gtags
     helm-projectile
     helm-swoop
+    helm-company
     function-args
     clean-aindent-mode
     comment-dwim-2
@@ -190,7 +202,10 @@
     projectile
     volatile-highlights
     undo-tree
-    zygospore))
+    zygospore
+    sr-speedbar
+    jdee
+    markdown-mode))
 
 (install-packages packages)
 
@@ -200,7 +215,7 @@
 ;; C/C++ stuff according to my own coding standards.
 ;;(require 'common-recommended)
 (require 'setup-emacs-extensions)
-(require 'common-recommended)
+;;(require 'common-recommended)
 
 ;; Turn on font-lock in all modes that support it
 
@@ -214,4 +229,4 @@
               auto-mode-alist))
 
 ;;; ---------------------------------------------------------------------------
-;; Automitic settings:
+;;; Automatic settings:

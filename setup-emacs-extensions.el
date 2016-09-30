@@ -15,20 +15,26 @@
 ;; function-args
 (require 'function-args)
 (fa-config-default)
-;;(define-key c-mode-map  [(tab)] 'company-complete)
-;;(define-key c++-mode-map  [(tab)] 'company-complete)
 
 ;; company
 (require 'company)
 (add-hook 'after-init-hook 'global-company-mode)
-(delete 'company-semantic company-backends)
-(define-key c-mode-map  [(tab)] 'company-complete)
-(define-key c++-mode-map  [(tab)] 'company-complete)
-;; (define-key c-mode-map  [(control tab)] 'company-complete)
-;; (define-key c++-mode-map  [(control tab)] 'company-complete)
+(setq company-backends '(company-bbdb
+                         company-eclim
+                         company-semantic
+                         helm-company
+                         company-c-headers
+                         company-capf
+                         (company-dabbrev-code
+                          company-gtags
+                          company-etags
+                          company-keywords)
+                         company-oddmuse
+                         company-files
+                         company-dabbrev))
 
-;; company-c-headers
-(add-to-list 'company-backends 'company-c-headers)
+(define-key c-mode-map  "\C-c\C-c" 'company-complete)
+(define-key c++-mode-map "\C-c\C-c"  'company-complete)
 
 ;; hs-minor-mode for folding source code
 (add-hook 'c-mode-common-hook 'hs-minor-mode)

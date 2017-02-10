@@ -29,7 +29,8 @@
 (setq scroll-conservatively 10000)
 (setq auto-window-vscroll nil)
 ;; Autosave every 500 typed characters
-(setq auto-save-interval 500)
+;;(setq auto-save-interval 500)
+(setq auto-save-default nil)
 ;; Delay updates to give Emacs a chance for other changes
 (setq linum-delay t)
 
@@ -59,7 +60,6 @@
       (cons (lambda ()
               (y-or-n-p "Really kill Emacs? "))
             kill-emacs-query-functions))
-
 
 ;;; ---------------------------------------------------------------------------
 ;;; Keyboard patches.
@@ -113,36 +113,6 @@
   (interactive)
   (revert-buffer nil t))
 
-(defun get-other-c++-buffer ()
-   (let* ((buffer-base-file-name
-           (file-name-sans-extension (buffer-file-name)))
-          (h-file-name (concat buffer-base-file-name ".h"))
-          (cpp-file-name (concat buffer-base-file-name ".cpp"))
-          (c-file-name (concat buffer-base-file-name ".c")))
-     (cond
-      ((string= cpp-file-name (buffer-file-name))
-       (find-file-noselect h-file-name t))
-      ((string= c-file-name (buffer-file-name))
-       (find-file-noselect h-file-name t))
-      ((string= h-file-name (buffer-file-name))
-       (if (file-exists-p c-file-name)
-           (find-file-noselect c-file-name t)
-           (find-file-noselect cpp-file-name t)))
-      (t (error "This is not a C/C++ file.")))))
-
-;; Switch to .cpp file when editing .h file and vice versa.
-;; Mapped to C-f8 (see below).
-(defun switch-to-other-c++-file ()
-   (interactive)
-   (switch-to-buffer (get-other-c++-buffer)))
-
-;; Switch to .cpp file in other frame, when editing .h file and vice versa.
-;; Mapped to C-M-f8 (see below).
-(defun switch-to-other-c++-file-in-next-frame ()
-   (interactive)
-   (set-window-buffer (frame-first-window (next-frame)) (get-other-c++-buffer))
-   (other-frame 1))
-
 ;; Change DOS newlines to UNIX style.
 ;; Mapped to C-f9 (see below)
 (defun go-unix-file ()
@@ -162,8 +132,6 @@
 (global-set-key "\C-c\C-g" 'goto-line)
 (global-set-key [M-i] 'indent-region)
 (global-set-key [C-f12] 'revert-buffer-no-questions-asked)
-(global-set-key [C-f8] 'switch-to-other-c++-file)
-(global-set-key [C-M-f8] 'switch-to-other-c++-file-in-next-frame)
 (global-set-key [C-f9] 'go-unix-file)
 
 ;;; ---------------------------------------------------------------------------
@@ -172,9 +140,14 @@
 ;; TODO: Change colors and fonts to your liking.
 
 (defun my-font-lock-colors ()
-  (set-face-foreground 'minibuffer-prompt "dark orange")
-)
+  (set-face-foreground 'minibuffer-prompt "dark orange"))
 (add-hook 'font-lock-mode-hook 'my-font-lock-colors)
+
+;; Turn on font-lock in all modes that support it
+
+(if (fboundp 'global-font-lock-mode)
+    (global-font-lock-mode t))
+(setq font-lock-maximum-decoration t)
 
 ;;; ---------------------------------------------------------------------------
 ;;; Packages.
@@ -191,6 +164,7 @@
     helm-projectile
     helm-swoop
     helm-company
+    helm-dash
     function-args
     clean-aindent-mode
     comment-dwim-2
@@ -204,29 +178,35 @@
     undo-tree
     zygospore
     sr-speedbar
+    markdown-mode
     jdee
-    markdown-mode))
+    javadoc-lookup
+    java-imports))
 
 (install-packages packages)
 
 ;;; ---------------------------------------------------------------------------
 ;;; Programming mode stuff.
 
-;; C/C++ stuff according to my own coding standards.
-;;(require 'common-recommended)
-(require 'setup-emacs-extensions)
-;;(require 'common-recommended)
-
-;; Turn on font-lock in all modes that support it
-
-(if (fboundp 'global-font-lock-mode)
-    (global-font-lock-mode t))
-(setq font-lock-maximum-decoration t)
-
-(setq auto-mode-alist
-      (append '(("\\.h$" . c++-mode)
-                ("\\.c$" . c++-mode))
-              auto-mode-alist))
+;;; Language supported
+(require 'ide-support)
+(require 'browser-support)
+(require 'c++-support)
+(require 'java-support)
 
 ;;; ---------------------------------------------------------------------------
 ;;; Automatic settings:
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (jtags java-imports javadoc-lookup helm-dash markdown-mode zygospore yasnippet ws-butler volatile-highlights undo-tree sr-speedbar smartparens jdee iedit helm-swoop helm-projectile helm-gtags helm-company ggtags function-args duplicate-thing dtrt-indent comment-dwim-2 clean-aindent-mode anzu))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

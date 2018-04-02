@@ -7,7 +7,7 @@
 
 ;;; Setup javadoc support
 (require 'javadoc-lookup)
-(javadoc-add-roots "/usr/share/doc/openjdk-8-jdk/api")
+;;(javadoc-add-roots "/usr/share/doc/openjdk-8-jdk/api")
 (setq browse-url-browser-function 'xwidget-webkit-browse-url)
 
 
